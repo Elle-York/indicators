@@ -1,0 +1,30 @@
+library(fingertipsR); library(dplyr)
+
+# extract data for 8 profiles
+
+data <- indicators(ProfileID = c(98,102,133,40,79,106,41,91))
+# 764 indicators on 8 MH profiles
+
+# extract and look at number of unique indicators
+length(unique(data$IndicatorID))
+# 479
+
+data_unique <- distinct(data, IndicatorID, .keep_all = T)
+
+# select those with populations in indicator name
+
+data_populations <- data_unique[grep("population", data_unique$IndicatorName),]
+# 132
+
+# repeat for dementia
+
+data <- indicators(ProfileID = c(84))
+# 59
+
+length(unique(data$IndicatorID))
+# 44
+
+data_unique <- distinct(data, IndicatorID, .keep_all = T)
+
+data_populations <- data_unique[grep("population", data_unique$IndicatorName),]
+# 10
