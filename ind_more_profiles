@@ -1,0 +1,37 @@
+# 1. Load Libraries -------------------- 
+
+library(fingertipsR) # load the package 
+
+library(tidyverse) 
+
+library(data.table) 
+
+
+
+# 2. Find profile ---------------------- 
+
+the_lot <- profiles() %>%  
+  
+  select(1:2) %>%  
+  
+  distinct() 
+
+
+
+# 3 Find indicators ------------------- 
+
+my_indicators <- indicators() %>%  
+  
+  arrange(IndicatorID) 
+
+# 36, 40, 41, 79, 991, 98, 102, 105, 106, 133 
+
+# Brings back all the individual indicators in your profile 
+
+no_repeats <- distinct(my_indicators, IndicatorID, .keep_all = TRUE)  
+
+# 4 Save indicators to csv file ------ 
+
+fwrite(no_repeats,file = "CYP_Profile.csv") 
+
+
