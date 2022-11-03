@@ -28,3 +28,14 @@ data_unique <- distinct(data, IndicatorID, .keep_all = T)
 
 data_populations <- data_unique[grep("population", data_unique$IndicatorName),]
 # 10
+
+-----------------------------------------------------------------------------
+
+indicators()## empty brackets produce a list of all the indicators on the fingertip website
+profiles()## produces a list of all the profiles including domains in fingertips
+
+
+dementia <-  indicators(c('1938132811', '1938132859', '1938132891', '1938132897', '1938132893',
+                        '193813289'),ProfileID = 84)
+
+dem <- subset(dementia, DomainName !="Pathway on a Page")
