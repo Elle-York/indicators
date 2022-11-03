@@ -1,0 +1,76 @@
+
+## Packages/Libraries ---------------------------------------------------------
+
+library(tidyverse)
+library(data.table)
+library(PHEindicatormethods)
+library(readxl)
+library(xlsx)
+library(lubridate)
+
+
+## Import Data ----------------------------------------------------------------
+
+df <- fread("Data/2017_UKPGEelectoraldata3.csv.", # 650 rows
+            skip = 2, 
+            header = T) 
+
+
+
+## Select columns -------------------------------------------------------------
+
+df <- df %>%
+  select(Code = 'ONS Code',
+         Area = Constituency, 
+         Expected = Electorate, 
+         Observed = 'Total number of ballots returned by close of poll')
+
+## Filter rows ----------------------------------------------------------------
+
+df <- df %>% filter(str_detect(Code,"E")) # England only - 533 rows
+
+
+## Import look-up -------------------------------------------------------------
+
+LUP <- fread("Data/Voter_LUP_LA.csv") # Make sure correct year imported - 593 rows
+
+LUP <- LUP %>% 
+  select(Constituency = PCON10CD,
+         UTLACode = UTLA13CD,
+         UTLAName = UTLA13NM,
+         RegionCode = RGN09CD,
+         RegionName = RGN09NM,
+         EnglandCode = CTRY09CD,
+         EnglandName = CTRY09NM)
+
+
+## Join data ------------------------------------------------------------------
+
+df <- left_join(df, LUP, by = c("Code" = "Constituency"))
+
+na_data <- df %>% filter_all(any_vars(is.na(.))) # check for NA values
+
+## Select columns -------------------------------------------------------------
+
+df <- df %>% select(UTLACode = UTLA13CD,
+                    UTLAName = UTLA13NM,
+                    RegionCode = RGN09CD,
+                    RegionName = RGN09NM,
+                    Expected,
+                    Observed)
+
+## String replace -------------------------------------------------------------
+
+str(df) # Check columns are correct type
+
+df$Expected <- as.numeric(gsub(",","",df$Expected)) # Change any cols from character to numeric
+
+
+## Group UTLAs ----------------------------------------------------------------
+
+UTLA <- df %>% 
+  group_by(Code) %>%
+  summarise(Expected = sum(Expected), Observed = sum(Observed))
+
+
+
