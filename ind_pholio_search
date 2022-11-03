@@ -1,0 +1,38 @@
+
+# 1. Load Libraries --------------------
+
+
+library(fingertipsR) # load the package
+
+
+# 2. Find profile ----------------------
+
+the_lot <- profiles() # Brings up all of the profiles in fingertips
+
+
+# 3. Find the profile ID ---------------
+
+View(the_lot) # find your profile and find the 'profile ID' number
+
+
+# 4. Find the profile domains ----------
+
+my_profiles <- profiles(ProfileID = 40) 
+# I've popped an example profile ID in, and it brings back all the domains in the profile
+
+
+# 5. Find the profile indicators -------
+
+my_indicators <- indicators(ProfileID = 40) 
+# Brings back all the individual indicators in your profile
+
+no_repeats <- distinct(my_indicators, IndicatorID, .keep_all = TRUE) 
+# Removes the duplicate indicator IDs and leaves you with the rest
+# .keep_all = TRUE - this means keep all the columns, otherwise it just brings a list of the unique indicator IDs
+
+
+# 6. Find the indicator data -----------
+
+my_indicator_data <- fingertips_data(IndicatorID = 92463)
+
+# Find the fingertips data for an individual indicator using the indicator ID
