@@ -1,0 +1,27 @@
+# 1. Load Libraries --------------------
+
+
+library(fingertipsR) # load the package
+library(tidyverse)
+library(data.table)
+
+
+# 2. Find profile ----------------------
+
+the_lot <- profiles() %>% 
+  select(1:2) %>% 
+  distinct()
+
+# 3 Find indicators -------------------
+
+my_indicators <- indicators() %>% 
+  arrange(IndicatorID)
+
+
+# Brings back all the individual indicators in your profile
+
+no_repeats <- distinct(my_indicators, IndicatorID, .keep_all = TRUE) 
+
+# 4 Save indicators to csv file ------
+
+fwrite(no_repeats,file = "Masterfile.csv")
