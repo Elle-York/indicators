@@ -1,0 +1,43 @@
+install.packages("devtools")
+library(devtools)
+install.packages("fingertipsR")
+library(fingertipsR)
+##---------------------------------------------------------------------
+thelot <- profiles()## Brings up all of the profiles in fingertips
+View(thelot)## Look in source view window to see the output
+class(thelot)
+##---------------------------------------------------------------------
+my_profiles <- profiles(ProfileID = 40)## Look for the profile ID and pop this in, neurology = 61, and dementia is 84
+df$DomainID
+##---------------------------------------------------------------------
+
+the_lot <- profiles() # Brings up all of the profiles in fingertips, find yours and find the 'profile ID' number
+
+my_profiles <- profiles(ProfileID = 40)
+
+my_indicators <- indicators(ProfileID = 40)
+
+no_repeats <- distinct(my_indicators, IndicatorID, .keep_all = TRUE)
+
+
+
+data <- indicators(ProfileID = 40) %>% 
+  distinct()
+                 
+                 
+c(DomainID =1938132720, DomainID = 8000041,
+                   DomainID = 8000026, DomainID = 8000042,
+                   DomainID = 8000043, DomainID = 8000044,
+                   DomainID =1938132954, DomainID = 1938132955))
+
+                 
+dgfine
+View(dg)
+class(dg)
+##---------------------------------------------------------------------
+dh <- indicator_metadata(IndicatorID = dg$IndicatorID)## Include all the indicator IDs and create a new dataframe
+dh
+View(dh)
+class(dh)
+
+dev.off()
