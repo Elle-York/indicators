@@ -1,0 +1,101 @@
+# 1. Packages
+library(dplyr
+
+#---------------------------------------------------
+# 2. Original data downloaded from following, saved as csv: 
+# http://www.digital.nhs.uk/catalogue/PUB30045
+
+#----------------------------------------------------
+# 3. Import the datasheet 
+# Check columns needed in original dataset and note the number
+
+qol <- read.csv("H:/R_Stuff/Projects/RClub/Datasets/qol1617.csv",
+                skip = 1, # Dont import the first line
+                header = TRUE, # Treat the first imported line as column headings
+                stringsAsFactors = FALSE)# Don't convert any data to factors
+
+# Method Two for Importing
+# qol <- tbl_df(fread("H:/Software/R Training/R Data/qol1617.csv",
+#               select = c(2,3,7,8,9),# select these columns
+#               skip = 1, # Dont import the first line
+#               header = TRUE, # Treat the first imported line as column headings
+#               stringsAsFactors = FALSE)) # Don't convert  data to 
+
+#------------------------------------------------
+# 4. View the data
+
+glimpse(qol)
+
+#---------------------------------------------------
+# 5.Select the columns you want to work with
+
+qola <- qol %>% 
+        select(2, 3, 7, 8, 1)
+
+# Rename the columns
+
+names(qola) <- c("LA Code", "LA Name", "Score", "Margin of Error", "Respondents")
+
+# Order the column by LA code
+
+qola <- qola[order(qola$`LA Code`), ] 
+
+#-------------------------------------------
+# 6. Clean the data
+
+# Remove missing values
+
+# nrow(qol)# Count the rows (190)
+# qol[complete.cases(qol),]# Show only rows without NAs
+# nrow(qol[complete.cases(qol),]) # Counts only rows without NAs (166)
+# qol[!complete.cases(qol),] # Show only rows with NAs 
+# nrow(qol[!complete.cases(qol),])# Show only rows with NAs (24)
+# Or we can just remove ALL rows with an NA, but theres no going back
+qolb <- na.omit(qola)
+# Lets check amount of rows (166)
+nrow(qolb)
+
+
+# So we've dealt with those pesky NAs, 
+# but now we need to deal with empty spaces!
+# Remove blank cells
+
+qolc <- qolb[!(qolb$`LA Code` == ""), ]
+nrow(qolc)# 161 rows
+
+#----------------------------------------------------
+# 7. Re-set the case ID
+
+# Re-order the ID column
+
+rownames(qolc) <- seq(length=nrow(qolc))
+
+#----------------------------------------------------
+# 8. Create the LCI and UCI columns, 
+
+
+qolc$LCI <- (qolc$Score - qolc$`Margin of Error`)
+qolc$UCI <- (qolc$Score + qolc$`Margin of Error`) 
+
+#---------------------------------------------------
+# 9. Join Data
+
+# a. import qa sheet.
+
+qa_92463 <- read.csv("H:/R_Stuff/Projects/RClub/Datasets/92463.csv",
+                     header = TRUE, # Treat the first imported line as column headings
+                     stringsAsFactors = FALSE)# Don't convert any data to factors)
+
+# b. rename ID column to match qol dataset
+
+names(qa_92463) <- c("LA Code", "LA Name", "Score","Margin of Error",
+                     "Respond.", "LCI", "UCI")
+
+
+qolc <- merge(qolc, qa_92463, by = "LA Code")
+qold <- qolc[ , -c(5, 8, 11)] # drop columns 5, 8 and 11
+
+#------------------------------------------------------
+# 10. Inspect the final dataset and check types of variables
+
+glimpse(qold)# check everything looks fine 
