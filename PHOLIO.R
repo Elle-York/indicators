@@ -1,4 +1,4 @@
-# SQL output to PHOLIO conversion ---------------------------------------------
+# Indicator Data to PHOLIO conversion -----------------------------------------
 
 # This script pulls in your indicator output and then converts each indicator to PHOLIO output
 # Just change the values to match the indicator
