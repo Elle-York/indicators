@@ -1,9 +1,8 @@
 # SQL output to PHOLIO conversion ---------------------------------------------
 
-# This script pulls in the SQL output and then converts each indicator to PHOLIO output
+# This script pulls in your indicator output and then converts each indicator to PHOLIO output
 # Just change the values to match the indicator
-# Be careful as every SQL script is formatted differently!
-# 91281/
+# Be careful as every data sheet is formatted differently!
 
 # 1. Packages/Libraries -------------------------------------------------------
 
@@ -14,11 +13,11 @@ library(readxl)
 library(xlsx)
 library(lubridate)
 
-# 2. Read in SQL output (saved as CSV file)
+# 2. Read in your indicator output (saved as CSV file)
 
-df <- fread("SQLoutput/91884_LA.csv") # change for each indicator
+df <- fread("my_data.csv") # change for each indicator
 
-names(df) # Check column headings of SQL output, differs every time!
+names(df) # Check column headings of output match section 3, differs every time!
 
 
 # 3. Convert to PHOLIO --------------------------------------------------------
@@ -48,4 +47,4 @@ df <- df %>%
 # 4. Save to PHOLIO csv ----------------------------------------------------------
 
 
-write.xlsx(df,file = "91884_LA.xlsx", sheetName = "PHOLIO")
+write.xlsx(df,file = "91884_LA.xlsx", sheetName = "PHOLIO") # this is just an example of how you might name it!
