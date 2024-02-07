@@ -1,0 +1,100 @@
+
+is.na(df)  # identify NAs in your data-set (df is the name of data-set so change it to whatever yours is called)
+
+is.na(df$col4) # find NAs in one particular column
+
+which(is.na(df)) # find where the NA values are
+
+sum(is.na(df)) # count the number of NAs in your data-set
+
+colSums(is.na(df)) # Count the number of NAs in each column
+
+
+# recode missing values with the mean
+x <- c(1:4, NA, 6:7, NA)
+x
+## [1]  1  2  3  4 NA  6  7 NA
+
+x[is.na(x)] <- mean(x, na.rm = TRUE)
+
+round(x, 2)
+## [1] 1.00 2.00 3.00 4.00 3.83 6.00 7.00 3.83
+
+# change 99s to NAs
+df[df == 99] <- NA
+df
+##   col1 col2
+## 1    1  2.5
+## 2    2  4.2
+## 3    3   NA
+## 4   NA  3.2
+
+
+# data frame with missing data
+df <- data.frame(col1 = c(1:3, NA),
+                 col2 = c("this", NA,"is", "text"), 
+                 col3 = c(TRUE, FALSE, TRUE, TRUE), 
+                 col4 = c(2.5, 4.2, 3.2, NA),
+                 stringsAsFactors = FALSE)
+                 
+df$col4[is.na(df$col4)] <- mean(df$col4, na.rm = TRUE)
+df
+##   col1 col2  col3 col4
+## 1    1 this  TRUE  2.5
+## 2    2 <NA> FALSE  4.2
+## 3    3   is  TRUE  3.2
+## 4   NA text  TRUE  3.3
+
+
+# Exclude missing values
+
+# use the na.rm = TRUE argument. If you do not exclude these values most functions will return an NA.
+# A vector with missing values
+x <- c(1:4, NA, 6:7, NA)
+
+# including NA values will produce an NA output
+mean(x)
+## [1] NA
+
+# excluding NA values will calculate the mathematical operation for all non-missing values
+mean(x, na.rm = TRUE)
+## [1] 3.833333
+We may also desire to subset our data to obtain complete observations, those observations (rows) in our data that contain no missing data. We can do this a few different ways.
+
+# data frame with missing values
+df <- data.frame(col1 = c(1:3, NA),
+                 col2 = c("this", NA,"is", "text"), 
+                 col3 = c(TRUE, FALSE, TRUE, TRUE), 
+                 col4 = c(2.5, 4.2, 3.2, NA),
+                 stringsAsFactors = FALSE)
+
+df
+##   col1 col2  col3 col4
+## 1    1 this  TRUE  2.5
+## 2    2 <NA> FALSE  4.2
+## 3    3   is  TRUE  3.2
+## 4   NA text  TRUE   NA
+First, to find complete cases we can leverage the complete.cases() function which returns a logical vector identifying rows which are complete cases. So in the following case rows 1 and 3 are complete cases. We can use this information to subset our data frame which will return the rows which complete.cases()found to be TRUE.
+
+complete.cases(df)
+## [1]  TRUE FALSE  TRUE FALSE
+
+# subset with complete.cases to get complete cases
+df[complete.cases(df), ]
+##   col1 col2 col3 col4
+## 1    1 this TRUE  2.5
+## 3    3   is TRUE  3.2
+
+# or subset with `!` operator to get incomplete cases
+df[!complete.cases(df), ]
+##   col1 col2  col3 col4
+## 2    2 <NA> FALSE  4.2
+## 4   NA text  TRUE   NA
+An shorthand alternative is to simply use na.omit() to omit all rows containing missing values.
+
+# or use na.omit() to get same as above na.omit(df) ## col1 col2 col3 col4 ## 1 1 this TRUE 2.5 ## 3 3 is TRUE 3.2
+
+# Test for blank values in character columns
+
+sum(my_data == "") #  Key in the name of your dataset and then the function will count number of blank character cells
+which(my_data == "", arr.ind = TRUE) # States where the empty cells are located (row and column)
