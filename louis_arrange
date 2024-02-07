@@ -1,0 +1,28 @@
+# 1. Load libraries + Data ----------------------------------------------------
+ 
+library(nycflights13) # load package with dataset included
+library(tidyverse) # load package
+df <- flights # rename flights data
+glimpse(df) # view flights data
+ 
+(na_values <- tibble(x = c(5, 2, NA))) # Create a dataset to practice with
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+# 2. Arrange rows -------------------------------------------------------------
+ 
+df %>% arrange(year) # Arrange rows in this columns ascending
+df %>% arrange(year, month, day) # Arrange rows in these columns ascending
+df %>% arrange(desc(arr_delay)) # Arrange rows in this column descending
+df %>% arrange(arr_delay, desc(dep_delay)) # Arrange 1st col ascending + 2nd descending
+na_values %>% arrange(x) # NA values to the bottom, other values ascending
+na_values %>% arrange(desc(x)) # NA values to bottom, other values descending
+na_values %>% arrange(!is.na(x)) # NA to the top
+na_values %>% arrange(!is.na(desc(x))) # NA to the top
