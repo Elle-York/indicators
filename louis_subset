@@ -1,0 +1,19 @@
+
+df[2:3, ] # Bring back rows 2 to 3
+
+df[, 2] # Bring back column 2
+
+df[1:2, c(1, 3)] # Bring rows 1 to 2, and columns 1 and 3
+
+
+# You need to use a dollar in the subsetting below. The dollar sign is used when we want to select columns. We have to put the dataset name/dollar/column name (ugh!)
+
+mtcars[mtcars$mpg > 20 & mtcars$cyl == 6, ] # Bring back everything that is greater than 20 in one column and also equals 6 in another column. 
+
+df[df$column_name > 20, ] # Bring back all rows in this column greater than 20
+
+# Or you could use the subset function
+
+subset(mtcars, mpg > 20) # Bring back all rows in this column greater than 20
+
+subset(mtcars, mpg > 20 & cyl == 6) # Bring back everything that is greater than 20 in one column and also equals 6 in another column. 
