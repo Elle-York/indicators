@@ -1,0 +1,47 @@
+-- This query finds... 
+-- Those patients with a patflag of A or C (acceptable for research)
+-- And whose practice is in England
+-- Who have a dementia readcode
+-- The code selects all recorded dementia readcodes
+-- Which were entered between 1st April 2016 - 31st March 2017 (between is inclusive)
+-- And who have not transferred out; or transferred out after 31st March 2017
+--------------------------------------------------------------------------------------
+
+--DROP TABLE [THIN_Analysis].[dbo].[DemDiag1617.LThackray]
+
+Select *
+INTO [THIN_Analysis].[dbo].[DemDiag1617.LThackray]
+from
+(
+SELECT 
+row_number () over (partition by a.combid order by b.evdate) AS DateNo,a.combid AS ID, a.yob AS DOB, a.sex, -- partitions and orders rows
+a.marit AS Marital, a.regdate, a.regstat, a.inst AS CareHome, a.death, a.xferdate,
+b.evdate AS FirstEvent, b.enddate, b.dtype AS Medinfo, b.medcode, b.medflag, b.staffid AS staff, b.source, b.episode, b.loc, 
+c.description
+
+FROM 
+[THIN_pps1705].[dbo].[pat1705] AS a
+INNER JOIN [THIN_med1705].[dbo].[med1705] AS b ON a.combid = b.combid
+LEFT JOIN [THIN_ancil1705].[dbo].[Readcodes1705] AS c ON b.medcode = c.medcode
+
+WHERE
+((patflag = 'A') OR (patflag = 'C'))
+AND a.prac IN (SELECT prac FROM [THIN_ancil1705].[dbo].[THINprac1705] WHERE Country = 'E' )
+AND b.medcode IN 
+('1281', '1461', '129B.00', 'A410.00', 'A411.00', 'A411000', 'A411011', 'E00..', 'E00..00',
+'E00..11', 'E00..12', 'E000', 'E000.', 'E000.00',  'E001.', 'E001.00', 'E0010', 'E001000', 'E0011', 
+'E001100', 'E0012', 'E001200', 'E0013', 'E001300', 'E001z', 'E001z00', 'E002', 'E002.', 'E002.00', 
+'E0020', 'E002000', 'E0021', 'E002100', 'E002z', 'E002z00', 'E003', 'E003.', 'E003.00', 'E004', 'E004.',
+'E004.00', 'E004.11', 'E0040', 'E004000', 'E0041', 'E004100', 'E0042', 'E004200', 'E0043', 'E004300', 
+'E004z', 'E004z00', 'E00y', 'E00y.', 'E00y.00', 'E00y.11', 'E00z', 'E00z.', 'E00z.00', 'E012', 'E012.', 'E012.00', 
+'E012.11', 'E0120', 'E012000', 'E02y100', 'E041', 'E041.00', 'Eu00.', 'Eu00.00', 'Eu000', 'Eu00000', 'Eu00011', 
+'Eu00012', 'Eu00013', 'Eu001', 'Eu00100', 'Eu00111', 'Eu00112', 'Eu00113', 'Eu002', 'Eu00200', 
+'Eu00z', 'Eu00z00', 'Eu00z11', 'Eu01.', 'Eu01.00', 'Eu01.11', 'Eu010', 'Eu01000', 'Eu011', 'Eu01100', 'Eu01111', 
+'Eu012', 'Eu01200', 'Eu013', 'Eu01300', 'Eu01y', 'Eu01y00', 'Eu01z', 'Eu01z00', 'Eu02.', 'Eu02.00', 'Eu020',
+'Eu02000', 'Eu021', 'Eu02100', 'Eu022', 'Eu02200', 'Eu023', 'Eu02300', 'Eu024', 'Eu02400', 'Eu025', 'Eu02500', 
+'Eu02y', 'Eu02y00', 'Eu02z', 'Eu02z00', 'Eu02z11', 'Eu02z12', 'Eu02z13', 'Eu02z14', 'Eu02z15', 'Eu02z16', 'Eu107', 'Eu10711', 'F110.', 
+'F110.00', 'F1100', 'F110000', 'F1101', 'F110100', 'F111.', 'F111.00', 'F112.', 'F112.00', 'F116', 'F116.00', 'F118.00', 
+'F21y200', 'F21y211', 'Fyu3000')
+AND b.evdate BETWEEN '20160401' AND '20170331'
+AND (xferdate = 00000000 OR xferdate > 20170331))D
+ORDER BY D.ID, D.FirstEvent
