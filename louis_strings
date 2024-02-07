@@ -1,0 +1,35 @@
+# 1. Load packages ------------------------------------------------------------
+
+if(!require("tidyverse")) {install.packages("tidyverse");library(tidyverse)}
+
+# 2. Changing character to numeric --------------------------------------------
+ 
+
+# So let's make a dataset. Just for fun, lets cock up the final column. We'll put in 1000 as character data. If you read in excel/csv sheets, this problem occurs quite a bit.
+ 
+
+my_colleagues <- tibble(
+  names = c("Doris", "Arthur", "Kima", "Atula", "Eleni", "Aruki", "Jandeep", "Milo"),
+  haircolour = c("Brown", "Grey", "Brown", "Purple", "Deep Brown", "Dip Dye", "Brown", "Striped"),
+  location = c("York", "Durham", "London", "Manchester", "Leeds", "Sheffield", "Newcastle", "Bristol"),
+  ID = c('1,000', '2,000', '3,000', '4,000', '5,000', '6,000', '7,000', '8,000'))
+ 
+# Ok lets look at the structure of the dataset. When we run the code below, we see ID is classed as a character column. Oh no!
+ 
+str(my_colleagues) # So column ID is a character and we want numeric...
+ 
+# Right, lets sort it out. We will convert our column to numeric. Using the gsub function, we state the pattern we don't want - "," - this means a comma.
+# Then we state the pattern we do want - "" - no comma. We also state the column (dataset$column):
+ 
+my_colleagues$ID <- as.numeric(gsub(",","", my_colleagues$ID))
+
+# 3. Remove whitespace in postcodes --------------------------------------------
+ 
+my_postcodes <- tibble(Postcode = c("ABC 123", "ABC 124", "CDE 125"),
+  Area = c(1:3))
+ 
+# Ok so we change (mutate) the Postcode column. We replace the white space ("  ") with no white space ("")
+ 
+ 
+my_postcodes %>%
+  mutate(Postcode = str_replace(Postcode, " ", ""))
