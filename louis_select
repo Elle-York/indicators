@@ -1,0 +1,58 @@
+# 1. Load libraries + Data ----------------------------------------------------
+ 
+library(nycflights13)
+library(tidyverse)
+df <- flights # load flights dataset and call it 'df'
+df1 <- mtcars # load mtcars dataset and call it 'df1'
+
+# 2. View data ---------------------------------------------------------------
+ 
+glimpse(df) # view df data (flights)
+glimpse(df1) # view df1 data (mtcars)
+?select # help file for select function
+
+# 3. Select columns -----------------------------------------------------------
+ 
+df %>% select(2) # select column 2
+df %>% select(2, 4, 7) # select columns 2, 4 and 7
+df %>% select(-(2)) # select every column but the 2nd
+df %>% select(-c(2, 4, 7)) # select every column except the 2nd, 4th, and 7th
+df %>% select(7, 4, 2) # select in any order you want
+df %>% select(1:7) # select columns 1 to 7
+
+df %>% select(year, month, day) # select columns by name
+df %>% select(year:day) # select a set of columns
+df %>% select(-(year:day)) # Exclude a set of columns
+df %>% select(starts_with('dep')) # Select columns that begin with 'dep'
+df %>% select(-starts_with('dep'))# Don't select cols that begin with 'dep'
+df %>% select(ends_with('time')) # Select columns that end with 'time'
+df %>% select(-ends_with('time')) # Don't select cols that end with 'time'
+df %>% select(matches('dep')) # select columns which match the phrase 'dep'
+df %>% select(contains('p_t')) # Select columns that contain 'p_t'
+df %>% select(num_range(1:5)) # select columns that have a number for a name
+df %>% select(time_hour, everything()) # puts 'time_hour' column first + selects everything
+df %>% select(times = time_hour) # Changes name of 'time_hour' to 'times'
+
+df %>% select_if(is.character) # Bring back character columns
+df %>% select_if(is.numeric) # Bring back numeric columns
+df %>% select_if(is.logical) # Bring back logical columns (TRUE/FALSE)
+df %>% select_if(is.integer) # Bring back integer columns
+df %>% select_if(is.factor) # Bring back factor columns (yes,no; poor, average, good etc.)
+
+df %>% select_all(toupper) # Change all cols to upper case
+df %>% select_all(tolower) # Change all cols to lower case
+df %>% select_all(~str_replace(., " ", "_")) # Put an underscore in blank column areas
+
+# Row names to column
+df1 %>% rownames_to_column("car_model") # Convert row names to a proper column with a name
+
+# List of columns and their numbered position...
+ 
+# Load the data (just copy the line of code below which will import data from the web)
+players <- read.csv("https://www.rforexcelusers.com/wp-content/uploads/2016/07/Batting.csv", stringsAsFactors = F)
+ 
+# To find the column numbers, use either piece of code below. Sometimes we might want to know where all of the columns are in relation to position.
+ 
+str(players) # list of columns and index position with attributes
+cbind(names(players)) # Will print out a vertical list of the columns, with their column position.
+t(colnames(players)) # Will print out horizontal lists of column positions.
