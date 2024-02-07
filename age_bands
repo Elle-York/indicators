@@ -1,0 +1,32 @@
+# Method One: The traditional way...
+
+# df1 is any dataset you have
+# df1$Age is a column with the various ages of each patient in it
+# df1$AgeCat is the new column you want to create which has age bandings
+# So the first line reads 'Create a new column called AgeCat. Take the values in the age column which are greater than or including 0, up to and including age 29. Then call these values in new column "0 - 29"
+
+df1$AgeCat[df1$Age >= 0 & df1$Age <= 29] <- "0 - 29"
+df1$AgeCat[df1$Age >= 30 & df1$Age <= 34] <- "30 - 34"
+df1$AgeCat[df1$Age >= 35 & df1$Age <= 39 ] <- "35 - 39"
+df1$AgeCat[df1$Age >= 40 & df1$Age <= 44 ] <- "40 - 44"
+df1$AgeCat[df1$Age >= 45 & df1$Age <= 49 ] <- "45 - 49"
+df1$AgeCat[df1$Age >= 50 & df1$Age <= 54 ] <- "50 - 54"
+df1$AgeCat[df1$Age >= 55 & df1$Age <= 59 ] <- "55 - 59"
+df1$AgeCat[df1$Age >= 60 & df1$Age <= 64 ] <- "60 - 64"
+df1$AgeCat[df1$Age >= 65 & df1$Age <= 69 ] <- "65 - 69"
+df1$AgeCat[df1$Age >= 70 & df1$Age <= 74 ] <- "70 - 74"
+df1$AgeCat[df1$Age >= 75 & df1$Age <= 79 ] <- "75 - 79"
+df1$AgeCat[df1$Age >= 80 & df1$Age <= 84 ] <- "80 - 84"
+df1$AgeCat[df1$Age >= 85 & df1$Age <= 89 ] <- "85 - 89"
+df1$AgeCat[df1$Age >= 90] <- "90+"
+
+# Method Two: Superquick way
+
+# Take df1 (your dataset), call it df2, and then mutate (change) contents of Age column by cutting (creating breaks) data into following breaks. 
+ 
+library(tidyverse)
+ 
+df2 <- df1 %>%
+  mutate(
+    AgeCat = cut(df1$Age, breaks = c(0, 29, 34, 39, 44, 49, 54, 59, 64, 69, 74, 79, 84, 89, 90, Inf))
+  )
