@@ -1,0 +1,64 @@
+https://teams.phe.gov.uk/sites/CKO/KIWD/SitePages/R%20resources.aspx (PHE)
+
+https://datacarpentry.org/R-ecology-lesson/05-r-and-databases.html
+
+http://blog.revolutionanalytics.com/2017/08/a-modern-database-interface-for-r.html
+
+https://www.rstudio.com/resources/videos/best-practices-for-working-with-databases-webinar/
+
+https://resources.rstudio.com/rstudio-conf-2019/databases-using-r-the-latest?utm_content=buffer4de67&utm_medium=social&utm_source=linkedin&utm_campaign=buffer
+
+# 1. Install following packages for connecting to Lake ------------------------------------------
+# Check you haven't installed these already
+# Have a look under the 'packages' tab (bottom left of screen)
+# If you can see the package names below, then they have been installed
+# You should only ever install once, but you can update in the tools section, under 'check for package updates'
+ 
+install.packages("odbc")
+install.packages("dplyr")
+install.packages("dbplyr")
+install.packages("data.table")
+
+# 2. Load following packages --------------------------------------------------------------------
+library(odbc)
+library(dplyr)
+library(dbplyr)
+library(data.table)
+
+# 3. Set up the DSN (Data Source Name) -----------------------------------------------------------
+# Control panel -> Administrative Tools -> Data Sources(odbc)
+# Click add
+# Select 'SQL server' from list - > finish
+# Give connection a name (mine is LT) - you don't need any quotes, just a name
+# Ignore the description box
+# Enter server name (log on to your SQL and copy name from 'server name' box)
+# Click next
+# Make no changes on remaining screens
+# Just press 'next' until you get to finish, and then press 'finish'
+# Then test the connection and then press ok in all open boxes
+
+# 4. Connect to Data Lake -----------------------------------------------------
+ 
+# Set up a project in the IA area (the area where you save work from the datalake)
+ 
+# If you don't know about 'projects' then visit https://support.rstudio.com/hc/en-us/articles/200526207-Using-Projects
+# DO NOT set up a project in any other directory
+# For example mine looks like the following "Z:/IA_UserData/louis.thackray/THIN Project/THIN.R/THIN.Project"
+# I would like to query the following table - THIN_med1705
+
+# 5. R and the DataLake
+# Open a new script in your project (IA dataset above)
+# Copy the code below and paste into R
+# Change the dsn to whatever personalised name you used in the DSN, below I put LT
+# Then put in whichever database you chose, I chose 'THIN_med1705
+# And then run the code
+ 
+conn <- DBI::dbConnect(odbc::odbc(),
+                       dsn = "LT",
+                       Database = "THIN_med1705",
+                       encrypt = "true",
+                       trusted_connection = "true")
+ 
+ 
+# You're now good to go, not sure what to do?
+# See the web links at top of page for further help.
