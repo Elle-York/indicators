@@ -1,0 +1,16 @@
+# For a really good website that explains merging in details, visit http://www.datasciencemadesimple.com/join-in-r-merge-in-r/
+
+# Use the merge ( ) function and its optional parameters:  
+# R automatically joins the frames by common variable names, specify these  to make sure that you are matching on only the fields desired. Also use the by.x and by.y parameters if the matching variables have different names in the different data frames.
+
+
+
+# Inner join: new_df <- merge(df1, df2, by = "CustomerId") - exists in both datasets
+
+# Outer join: new_df <- merge(x = df1, y = df2, by = "CustomerId", all = TRUE) - join everything in both tables together
+
+# Left outer:  new_df <- merge(x = df1, y = df2, by = "CustomerId", all.x = TRUE) - join to the left
+
+# Right outer: new_df <- merge(x = df1, y = df2, by = "CustomerId", all.y = TRUE) - join to the right
+
+# Cross join: new_df <- merge(x = df1, y = df2, by = NULL) A Cross Join results in every row of one table being joined to every row of another table
