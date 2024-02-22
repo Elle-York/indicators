@@ -1,0 +1,150 @@
+USE BirthsDeaths;
+GO
+
+/******  Adapted code from Steven Hales																																   ******/
+/******  Years of Life Lost due to suicide, age-standardised rate 15-74 years for persons, males, and females, 3 years pooled                                          ******/
+
+-- Set the variables associated with calculating the confidence levels (95%)
+DECLARE @z FLOAT = 1.95996398454005;
+DECLARE @confidence FLOAT = 0.95;
+DECLARE @AgeRangeFactor AS FLOAT = 75000.0; -- ESP 2013 population (people aged 15-74)
+
+-- Start the calculation query
+-- create tables using CTE
+WITH ctePopulations AS ( --1st CTE
+-- First find the populations | Upper Tier Local Authority, England
+    SELECT [Period], OfficialCode, GeoName, Sex, QuinaryAgeBand, [Population]
+      FROM Populations.dbo.vRes_UTLA21_FiveYear --adapt for CCGs
+      WHERE [Period] BETWEEN 2018 and 2020 --change year accordingly so we are calculating for 4 three year periods starting from 2013
+        AND QuinaryAgeBand IN('15-19', '20-24', '25-29', '30-34', '35-39', '40-44', '45-49', '50-54', '55-59', '60-64', '65-69', '70-74')
+        AND OfficialCode LIKE 'E%'
+
+-- England totals
+    UNION ALL --combines for local area and national
+      SELECT [Period], OfficialCode, GeoName, Sex, QuinaryAgeBand, [Population]
+        FROM Populations.dbo.vRes_CTRY09_FiveYear
+        WHERE [Period] BETWEEN 2018 and 2020 --change year accordingly
+          AND QuinaryAgeBand IN('15-19', '20-24', '25-29', '30-34', '35-39', '40-44', '45-49', '50-54', '55-59', '60-64', '65-69', '70-74')
+          AND OfficialCode LIKE 'E%'
+  ), cteDeaths AS ( -- 2nd CTE
+-- query to pull the death records that you need, counts will be created by the next Common Table Expression (CTE)
+    SELECT d.xYear, d.Sex
+         , (CASE
+              WHEN d.Sex = 1 THEN 'Male'
+              WHEN d.Sex = 2 THEN 'Female'
+            END) AS SexDesc
+         , (CASE
+              WHEN d.Age_UnitVal BETWEEN 15 AND 19 THEN '15-19'
+              WHEN d.Age_UnitVal BETWEEN 20 AND 24 THEN '20-24'
+              WHEN d.Age_UnitVal BETWEEN 25 AND 29 THEN '25-29'
+              WHEN d.Age_UnitVal BETWEEN 30 AND 34 THEN '30-34'
+              WHEN d.Age_UnitVal BETWEEN 35 AND 39 THEN '35-39'
+              WHEN d.Age_UnitVal BETWEEN 40 AND 44 THEN '40-44'
+              WHEN d.Age_UnitVal BETWEEN 45 AND 49 THEN '45-49'
+              WHEN d.Age_UnitVal BETWEEN 50 AND 54 THEN '50-54'
+              WHEN d.Age_UnitVal BETWEEN 55 AND 59 THEN '55-59'
+              WHEN d.Age_UnitVal BETWEEN 60 AND 64 THEN '60-64'
+              WHEN d.Age_UnitVal BETWEEN 65 AND 69 THEN '65-69'
+              WHEN d.Age_UnitVal BETWEEN 70 AND 74 THEN '70-74'
+            END) AS QuinaryAgeBand
+         , l.UTLA21CD, l.UTLA21NM
+         , 'E92000001' AS CTRY
+      FROM [dbo].[vDeathsALL_NSPL_2021-05] d
+        INNER JOIN [LookupsShared].[dbo].[vLKP_LSOA11] l ON d.[LSOA11_PC] = l.[LSOA11CD] 
+      WHERE (d.xYear BETWEEN 2018 and 2020)--change time period
+        AND --suicide cause of death codes [UCOD] = X60-X84 (ages 10 and over) or Y10-Y34 (ages 15 and over)	
+			 (((d.[UCOD] like 'X60%' OR d.[UCOD] like 'X61%' OR d.[UCOD] like 'X62%' OR d.[UCOD] like 'X63%' OR d.[UCOD] like'X64%' OR d.[UCOD] like 'X65%' 
+						OR d.[UCOD] like 'X66%' OR d.[UCOD] like 'X67%' OR d.[UCOD] like 'X68%' OR d.[UCOD] like 'X69%' OR d.[UCOD] like 'X70%'
+						OR d.[UCOD] like 'X71%' OR d.[UCOD] like 'X72%' OR d.[UCOD] like 'X73%' OR d.[UCOD] like 'X74%' OR d.[UCOD] like 'X75%' 
+						OR d.[UCOD] like 'X76%' OR d.[UCOD] like 'X77%' OR d.[UCOD] like 'X78%' OR d.[UCOD] like 'X79%' OR d.[UCOD] like 'X80%' 
+						OR d.[UCOD] like 'X81%'OR d.[UCOD] like 'X82%' OR d.[UCOD] like 'X83%' OR d.[UCOD] like 'X84%') AND d.[xAGE_Year] >= 1)
+						OR 
+						((d.[UCOD] like 'Y10%' OR d.[UCOD] like 'Y11%' OR d.[UCOD] like 'Y12%' OR d.[UCOD] like 'Y13%' OR d.[UCOD] like 'Y14%' 
+						OR d.[UCOD] like 'Y15%' OR d.[UCOD] like 'Y16%' OR d.[UCOD] like 'Y17%' OR d.[UCOD] like 'Y18%' OR d.[UCOD] like 'Y19%'
+						OR d.[UCOD] like 'Y20%' OR d.[UCOD] like 'Y21%' OR d.[UCOD] like 'Y22%' OR d.[UCOD] like 'Y23%' OR d.[UCOD] like 'Y24%' 
+						OR d.[UCOD] like 'Y25%'OR d.[UCOD] like 'Y26%' OR d.[UCOD] like 'Y27%' OR d.[UCOD] like 'Y28%' OR d.[UCOD] like 'Y29%' 
+						OR d.[UCOD] like 'Y30%'OR d.[UCOD] like 'Y31%' OR d.[UCOD] like 'Y32%' OR d.[UCOD] like 'Y33%' OR d.[UCOD] like  'Y34%') AND d.[xAGE_Year] >= 15)
+						)  
+        AND (d.Age_UnitVal BETWEEN 15 AND 74 AND d.Age_Unit = 1)
+  ), cteDeathCounts AS ( -- 3rd CTE, count number of deaths for every geog.
+    SELECT xYear, UTLA21CD AS GeographyCode, SexDesc, Sex, COUNT(*) AS Deaths, QuinaryAgeBand
+      FROM cteDeaths
+	  WHERE UTLA21CD IS NOT NULL
+      GROUP BY UTLA21CD, Sex, SexDesc, QuinaryAgeBand, xYear
+-- Country summary
+    UNION ALL
+      SELECT xYear, CTRY, SexDesc, Sex, COUNT(*), QuinaryAgeBand
+        FROM cteDeaths
+        GROUP BY CTRY, Sex, SexDesc, QuinaryAgeBand, xYear
+-- Person Summaries for county and UA and England
+    UNION ALL
+      SELECT xYear, UTLA21CD, 'Persons', 4, COUNT(*), QuinaryAgeBand
+        FROM cteDeaths
+        GROUP BY UTLA21CD, QuinaryAgeBand, xYear
+
+    UNION ALL
+      SELECT xYear, CTRY, 'Persons', 4, COUNT(*), QuinaryAgeBand
+        FROM cteDeaths
+        GROUP BY  CTRY, QuinaryAgeBand, xYear
+  ), cteYearsLost AS ( --4th CTE, counting YLL if everyone died from suicide
+    SELECT '00-04' AS AgeBand, 362500 AS [Population]
+      UNION ALL SELECT '05-09', 371250
+      UNION ALL SELECT '10-14', 343750
+      UNION ALL SELECT '15-19', 316250
+      UNION ALL SELECT '20-24', 315000
+      UNION ALL SELECT '25-29', 285000
+      UNION ALL SELECT '30-34', 276250
+      UNION ALL SELECT '35-39', 262500
+      UNION ALL SELECT '40-44', 227500
+      UNION ALL SELECT '45-49', 192500
+      UNION ALL SELECT '50-54', 157500
+      UNION ALL SELECT '55-59', 113750
+      UNION ALL SELECT '60-64', 75000
+      UNION ALL SELECT '65-69', 41250
+      UNION ALL SELECT '70-74', 12500
+      UNION ALL SELECT '75-79', 0
+      UNION ALL SELECT '80-84', 0
+      UNION ALL SELECT '85-89', 0
+      UNION ALL SELECT '90+', 0
+  ), cteSummary AS ( --5th CTE
+    SELECT '2018 to 2020' AS [Period], p.OfficialCode AS GeoCode, p.GeoName, p.Sex --change time period
+         , (CASE
+              WHEN p.Sex = 1 THEN 'Male'
+              WHEN p.Sex = 2 THEN 'Female'
+              WHEN p.Sex = 4 THEN 'Persons'
+            END) AS SexDesc
+         , p.QuinaryAgeBand, SUM(p.[Population]) AS [Population]
+         , SUM(d.Deaths) AS Deaths
+      FROM ctePopulations p --1st CTE
+        LEFT OUTER JOIN cteDeathCounts d --3rd CTE
+          ON p.Period = d.xYear AND p.OfficialCode = d.GeographyCode AND p.Sex = d.Sex AND p.QuinaryAgeBand = d.QuinaryAgeBand
+        LEFT OUTER JOIN cteYearsLost e ON p.QuinaryAgeBand = e.AgeBand
+      GROUP BY p.OfficialCode, p.GeoName, p.Sex, p.QuinaryAgeBand
+  ), cteCalculation AS ( --6th CTE
+    SELECT s.[Period], s.GeoCode, s.GeoName, s.Sex, s.SexDesc, s.QuinaryAgeBand
+         , s.[Population]
+         , s.Deaths
+         , e.[Population] AS EPopulation --from 4th CTE, YLL if everyone died from suicide
+         , ((CAST(s.Deaths AS FLOAT) / CAST(s.[Population] AS FLOAT)) * CAST(e.[Population] AS FLOAT)) * (10000.0 / @AgeRangeFactor) AS RefRate -- DSR
+         , ((CAST(s.Deaths AS FLOAT) / CAST(s.[Population] AS FLOAT)) * CAST(e.[Population] AS FLOAT)) as A_RefRate
+		 , POWER(CAST(e.[Population] AS FLOAT) / @AgeRangeFactor / CAST(s.[Population] AS FLOAT), 2) * s.Deaths AS Wi -- variance of DSR, used as part of calculating upper and lower DSRs
+         , CAST(e.[Population] AS FLOAT) * CAST(s.Deaths AS FLOAT) AS YearsLost
+		 --,(1/power(@AgeRangeFactor,2)) as VarDSR1
+		 ,power((cast(e.Population as float)/cast(s.population as float)),2)*s.Deaths as VarDSR2
+      FROM cteSummary s --5th CTE
+        LEFT OUTER JOIN cteYearsLost e ON s.QuinaryAgeBand = e.AgeBand
+  )
+  SELECT [Period], GeoCode, GeoName, Sex, SexDesc, '15 to 74' AS AgeGroup
+       , SUM([Population]) AS [Population]
+       , SUM(Deaths) AS Deaths
+       , SUM(YearsLost) AS TotalYearsLost
+       , SUM(RefRate) AS Rate
+	   , sum(A_RefRate)*(10000/@AgeRangeFactor) as A_Rate
+       , SUM(CAST(RefRate AS FLOAT)) + (SQRT(SUM(CAST(Wi AS FLOAT)) / SUM(CAST(Deaths AS FLOAT))) * 10000.0) * (SUM(CAST(Deaths AS FLOAT)) * (POWER(1-(1/(9*SUM(CAST(Deaths AS FLOAT))))-(@z/(3*(SQRT(SUM(CAST(Deaths AS FLOAT)))))),3))-SUM(CAST(Deaths AS FLOAT))) AS LL 
+       , sum(cast(A_RefRate as float))*(10000/@AgeRangeFactor) + (sqrt((1/power(@AgeRangeFactor,2))*sum(VarDSR2)/sum(cast(deaths as float)))*(SUM(CAST(Deaths AS FLOAT)) * (POWER(1-(1/(9*SUM(CAST(Deaths AS FLOAT))))-(@z/(3*(SQRT(SUM(CAST(Deaths AS FLOAT)))))),3))-SUM(CAST(Deaths AS FLOAT)))*10000) as A_LL
+ 	   , SUM(CAST(RefRate AS FLOAT)) + (SQRT(SUM(CAST(Wi AS FLOAT)) / SUM(CAST(Deaths AS FLOAT))) * 10000.0) * ((SUM(CAST(Deaths AS FLOAT)) + 1.0) * (POWER(1-(1/(9*(SUM(CAST(Deaths AS FLOAT))+1.0)))+(@z/(3*(SQRT(SUM(CAST(Deaths AS FLOAT))+1.0)))),3))-SUM(CAST(Deaths AS FLOAT))) AS UL 
+	   , sum(cast(A_RefRate as float))*(10000/@AgeRangeFactor) + (sqrt((1/power(@AgeRangeFactor,2))*sum(VarDSR2)/sum(cast(deaths as float)))*((SUM(CAST(Deaths AS FLOAT)) + 1.0) * (POWER(1-(1/(9*(SUM(CAST(Deaths AS FLOAT))+1.0)))+(@z/(3*(SQRT(SUM(CAST(Deaths AS FLOAT))+1.0)))),3))-SUM(CAST(Deaths AS FLOAT)))*10000) as A_UL
+	FROM cteCalculation
+    GROUP BY [Period], GeoCode, GeoName, Sex, SexDesc
+    ORDER BY GeoCode, SexDesc
+GO
