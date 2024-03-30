@@ -1,2 +1,67 @@
+Filter Rows
+
 # 1. Load Libraries -----------------------------------------------------------
 if(!require("tidyverse")) {install.packages("tidyverse");library(tidyverse)}
+
+#2. Create a dataset ----------------------------------------------------------
+
+df <- tibble(
+  Firstname = c("Lola", "Manwell", "Kirana", "Tatum", "Sol", "Mofatt", "Azuki", "Modo"),
+  Skill = c("SQL", "R", "Excel", "Python", "Access", "Git", "Linux", "R"),
+  Work_Office = c("York", "Durham", "London", "London", "Leeds", "Leeds", "London", "Bristol"),
+  ID = c(1, 2 , 3, 4, 5, 6, 7, 8)
+)
+# 3. Filter Rows --------------------------------------------------------------
+
+# Let's use the filter( ) function to filter rows...
+
+df %>% filter(ID == 2)
+# take df and then filter on ID column, all values that equal 2 - notice that equal uses == not =
+
+
+# %>% 'the pipe' is a symbol that means 'then' - shortcut is Control + Shift + M
+# Notice how the code doesn't include the assignment operator (<-)
+# This means we can try before we buy! Basically without the operator, the output will only be printed in the console
+# If we add an assignment operator, then the code gets a name and it's stored as a dataset
+
+
+# E.g df <- df %>% filter(ID == 2)
+# Assign the name df to our work, use df and then filter on ID column, all values that equal 2 - notice that equal uses == not =
+
+df %>% filter(ID >= 2)
+# take df and then filter on ID column values greater than or equal to 2
+
+df %>% filter(ID <= 2)
+# take df and then filter on ID column values less than or equal to 2
+
+df %>% filter(ID != 2)
+# take df and then filter on ID column, values which are not equal to 2
+
+df %>% filter(Skill %in% c("R", "SQL"))
+# take df and then filter on Skill column and find values of 'R' & 'SQL' in this group
+
+
+df %>% filter(!Skill %in% c("R", "SQL"))
+# take df and then filter on Skill column and don't include values of 'R' & 'SQL' in this group
+
+df %>% filter(between(ID, 4, 8))
+# take df and then filter on ID column between the numbers 4 to 8 inclusive
+
+df %>% filter(ID > 3 &  Skill == "R") 
+# take df and then filter ID column values greater than 3 and skill is R
+
+df %>% filter(ID > 3 | Skill == "R") 
+# take df and then filter ID column where values are greater than 3 or skill is R
+
+df %>% filter(str_detect(column, "^E")) # all names in a column that begin with 'E'
+
+df %>% filter(str_detect(column, "E$")) # all names in the column that end with 'E'
+
+df %>% filter(str_detect(column, "This|That")) # find all names in column that contain 'this' and 'that'
+
+# See this link for more info: https://sebastiansauer.github.io/dplyr_filter/  
+Resources
+
+https://suzan.rbind.io/2018/02/dplyr-tutorial-3/
+https://dplyr.tidyverse.org/reference/filter.html
+
